@@ -73,6 +73,9 @@ htmlcov/
 *.zip
 *.tar.gz
 
+# PDF generation scripts (not needed for core app)
+generate_pdf_report*.py
+
 # Documentation build
 docs/_build/
 
