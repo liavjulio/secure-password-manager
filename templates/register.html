@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Register - Secure Password Manager{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-person-plus-fill me-2"></i>
+                        Create Your Account
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" novalidate>
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Username Field -->
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                            {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    3-30 characters, letters, numbers, and underscores only
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email Field -->
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+                            {% if form.email.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.email.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Used for account verification and password recovery
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), id="passwordField") }}
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('passwordField')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.password.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="form-text">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Minimum 8 characters with uppercase, lowercase, numbers, and symbols
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Confirm Password Field -->
+                        <div class="mb-3">
+                            {{ form.confirm_password.label(class="form-label") }}
+                            <div class="input-group">
+                                {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), id="confirmPasswordField") }}
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPasswordField')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            {% if form.confirm_password.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {% for error in form.confirm_password.errors %}
+                                        <div>{{ error }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Password Strength Indicator -->
+                        <div class="mb-3">
+                            <div class="password-strength">
+                                <label class="form-label small">Password Strength:</label>
+                                <div class="progress" style="height: 8px;">
+                                    <div id="strengthBar" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                </div>
+                                <small id="strengthText" class="form-text text-muted">Enter a password to see strength</small>
+                            </div>
+                        </div>
+
+                        <!-- Terms Notice -->
+                        <div class="mb-3">
+                            <div class="alert alert-info small">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Privacy Notice:</strong> This is an educational project. 
+                                Your data is encrypted and stored locally. Do not use real passwords 
+                                from other services for testing purposes.
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid mb-3">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
+                        </div>
+                    </form>
+
+                    <!-- Divider -->
+                    <hr class="my-4">
+
+                    <!-- Login Link -->
+                    <div class="text-center">
+                        <p class="mb-0">
+                            Already have an account?
+                            <a href="{{ url_for('login') }}" class="text-decoration-none">
+                                <strong>Sign in here</strong>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Features -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="bi bi-shield-lock-fill text-success me-2"></i>
+                        Your Security is Our Priority
+                    </h6>
+                    <div class="row small text-muted">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="bi bi-check text-success me-1"></i> bcrypt password hashing</li>
+                                <li><i class="bi bi-check text-success me-1"></i> AES-256 encryption</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled mb-0">
+                                <li><i class="bi bi-check text-success me-1"></i> CSRF protection</li>
+                                <li><i class="bi bi-check text-success me-1"></i> Secure sessions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordField = document.getElementById('passwordField');
+    const confirmField = document.getElementById('confirmPasswordField');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+
+    // Password strength checker
+    function checkPasswordStrength(password) {
+        let score = 0;
+        let feedback = [];
+
+        if (password.length >= 8) score += 20;
+        else feedback.push('At least 8 characters');
+
+        if (/[a-z]/.test(password)) score += 20;
+        else feedback.push('Lowercase letter');
+
+        if (/[A-Z]/.test(password)) score += 20;
+        else feedback.push('Uppercase letter');
+
+        if (/[0-9]/.test(password)) score += 20;
+        else feedback.push('Number');
+
+        if (/[^a-zA-Z0-9]/.test(password)) score += 20;
+        else feedback.push('Special character');
+
+        return { score, feedback };
+    }
+
+    // Update strength indicator
+    function updateStrengthIndicator() {
+        const password = passwordField.value;
+        const result = checkPasswordStrength(password);
+
+        strengthBar.style.width = result.score + '%';
+        
+        if (result.score === 0) {
+            strengthBar.className = 'progress-bar';
+            strengthText.textContent = 'Enter a password to see strength';
+            strengthText.className = 'form-text text-muted';
+        } else if (result.score < 60) {
+            strengthBar.className = 'progress-bar bg-danger';
+            strengthText.textContent = 'Weak - Missing: ' + result.feedback.join(', ');
+            strengthText.className = 'form-text text-danger';
+        } else if (result.score < 100) {
+            strengthBar.className = 'progress-bar bg-warning';
+            strengthText.textContent = 'Good - Missing: ' + result.feedback.join(', ');
+            strengthText.className = 'form-text text-warning';
+        } else {
+            strengthBar.className = 'progress-bar bg-success';
+            strengthText.textContent = 'Strong password!';
+            strengthText.className = 'form-text text-success';
+        }
+    }
+
+    // Password confirmation checker
+    function checkPasswordMatch() {
+        const password = passwordField.value;
+        const confirm = confirmField.value;
+
+        if (confirm.length > 0) {
+            if (password === confirm) {
+                confirmField.classList.remove('is-invalid');
+                confirmField.classList.add('is-valid');
+            } else {
+                confirmField.classList.remove('is-valid');
+                confirmField.classList.add('is-invalid');
+            }
+        } else {
+            confirmField.classList.remove('is-valid', 'is-invalid');
+        }
+    }
+
+    // Event listeners
+    passwordField.addEventListener('input', function() {
+        updateStrengthIndicator();
+        checkPasswordMatch();
+    });
+
+    confirmField.addEventListener('input', checkPasswordMatch);
+
+    // Focus on username field
+    const usernameField = document.getElementById('username');
+    if (usernameField) {
+        usernameField.focus();
+    }
+});
+</script>
+{% endblock %}

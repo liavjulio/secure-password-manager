@@ -1,0 +1,623 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Secure Password Manager{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Dashboard Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2 class="text-white mb-2">
+                <i class="bi bi-grid-fill me-2"></i>
+                Your Password Vault
+            </h2>
+            <p class="text-white-50 mb-0">
+                Manage your securely encrypted passwords
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="{{ url_for('add_password') }}" class="btn btn-success">
+                <i class="bi bi-plus-circle-fill me-2"></i>
+                Add New Password
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="display-6 text-primary mb-2">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <h5 class="card-title">{{ passwords|length }}</h5>
+                    <p class="card-text text-muted small">Stored Passwords</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="display-6 text-success mb-2">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h5 class="card-title">AES-256</h5>
+                    <p class="card-text text-muted small">Encryption Standard</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="display-6 text-info mb-2">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <h5 class="card-title">{{ current_user.username }}</h5>
+                    <p class="card-text text-muted small">Account Owner</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <div class="display-6 text-warning mb-2">
+                        <i class="bi bi-clock-fill"></i>
+                    </div>
+                    <h5 class="card-title">
+                        {% if current_user.last_login %}
+                            {{ current_user.last_login.strftime('%m/%d') }}
+                        {% else %}
+                            First Login
+                        {% endif %}
+                    </h5>
+                    <p class="card-text text-muted small">Last Login</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="searchInput" 
+                                       placeholder="Search passwords by service, username, or URL...">
+                            </div>
+                        </div>
+                        <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                            <button class="btn btn-outline-primary btn-sm show-all-btn" type="button">
+                                <i class="bi bi-eye-fill me-1"></i>Show All
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm hide-all-btn" type="button">
+                                <i class="bi bi-eye-slash-fill me-1"></i>Hide All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Passwords List -->
+    {% if passwords %}
+        <div class="row" id="passwordsList">
+            {% for password in passwords %}
+            <div class="col-12 mb-3 password-item" 
+                 data-service="{{ password.service.lower() }}" 
+                 data-username="{{ password.username.lower() }}" 
+                 data-url="{{ password.url.lower() if password.url else '' }}">
+                <div class="password-entry">
+                    <div class="row align-items-center">
+                        <!-- Service Info -->
+                        <div class="col-md-3">
+                            <h6 class="mb-1">
+                                <i class="bi bi-building text-primary me-2"></i>
+                                {{ password.service }}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="bi bi-person me-1"></i>{{ password.username }}
+                            </small>
+                        </div>
+
+                        <!-- Password Field -->
+                        <div class="col-md-4">
+                            <div class="password-display">
+                                <div class="input-group">
+                                    <input type="password" class="form-control password-field" 
+                                           id="pwd-{{ password.id }}" 
+                                           value="{{ password.password }}" 
+                                           readonly>
+                                    <button class="btn btn-outline-secondary btn-sm toggle-password-btn" type="button" 
+                                            data-target="pwd-{{ password.id }}">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-outline-primary btn-sm copy-password-btn" type="button" 
+                                            data-password="{{ password.password|e }}">
+                                        <i class="bi bi-clipboard"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- URL and Notes -->
+                        <div class="col-md-3">
+                            {% if password.url %}
+                            <div class="mb-1">
+                                <a href="{{ password.url }}" target="_blank" class="text-decoration-none small">
+                                    <i class="bi bi-link-45deg me-1"></i>{{ password.url[:30] }}{% if password.url|length > 30 %}...{% endif %}
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if password.notes %}
+                            <small class="text-muted">
+                                <i class="bi bi-sticky me-1"></i>{{ password.notes[:40] }}{% if password.notes|length > 40 %}...{% endif %}
+                            </small>
+                            {% endif %}
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="col-md-2 text-end">
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('edit_password', password_id=password.id) }}" 
+                                   class="btn btn-outline-warning btn-sm" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm delete-password-btn" 
+                                        data-password-id="{{ password.id }}" 
+                                        data-service-name="{{ password.service }}" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata Row -->
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <small class="text-muted">
+                                <i class="bi bi-clock me-1"></i>
+                                Created: {{ password.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                {% if password.updated_at != password.created_at %}
+                                    | Updated: {{ password.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- No Results Message -->
+        <div id="noResults" class="row" style="display: none;">
+            <div class="col-12">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-search display-1 text-muted mb-3"></i>
+                        <h5>No passwords found</h5>
+                        <p class="text-muted">Try adjusting your search terms or add a new password.</p>
+                        <a href="{{ url_for('add_password') }}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Add New Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% else %}
+        <!-- Empty State -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card text-center">
+                    <div class="card-body py-5">
+                        <i class="bi bi-shield-lock display-1 text-muted mb-4"></i>
+                        <h4>Your password vault is empty</h4>
+                        <p class="text-muted mb-4">
+                            Start securing your digital life by adding your first password.
+                            All passwords are encrypted with AES-256 before storage.
+                        </p>
+                        <a href="{{ url_for('add_password') }}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-plus-circle-fill me-2"></i>
+                            Add Your First Password
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                    Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete the password for <strong id="serviceToDelete"></strong>?</p>
+                <p class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    This action cannot be undone. The password will be permanently removed from your vault.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-2"></i>Delete Password
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Password visibility toggle
+function togglePasswordVisibility(fieldId) {
+    console.log('togglePasswordVisibility called with fieldId:', fieldId);
+    const field = document.getElementById(fieldId);
+    if (!field) {
+        console.error('Password field not found:', fieldId);
+        return;
+    }
+    
+    const button = field.nextElementSibling;
+    const icon = button.querySelector('i');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('bi-eye');
+        icon.classList.add('bi-eye-slash');
+        console.log('Password shown for field:', fieldId);
+    } else {
+        field.type = 'password';
+        icon.classList.remove('bi-eye-slash');
+        icon.classList.add('bi-eye');
+        console.log('Password hidden for field:', fieldId);
+    }
+}
+
+// Show all passwords
+function showAllPasswords() {
+    console.log('showAllPasswords function called');
+    const passwordFields = document.querySelectorAll('.password-field');
+    console.log('Found password fields to show:', passwordFields.length);
+    
+    passwordFields.forEach(function(field) {
+        field.type = 'text';
+        const button = field.nextElementSibling;
+        if (button) {
+            const icon = button.querySelector('i');
+            if (icon) {
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            }
+        }
+    });
+    
+    startPasswordVisibilityTimer();
+    console.log('All passwords shown');
+}
+
+// Hide all passwords
+function hideAllPasswords() {
+    console.log('hideAllPasswords function called');
+    const passwordFields = document.querySelectorAll('.password-field');
+    console.log('Found password fields to hide:', passwordFields.length);
+    
+    passwordFields.forEach(function(field) {
+        field.type = 'password';
+        const button = field.nextElementSibling;
+        if (button) {
+            const icon = button.querySelector('i');
+            if (icon) {
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    });
+    
+    console.log('All passwords hidden');
+}
+
+// Copy to clipboard functionality
+function copyToClipboard(text, button) {
+    console.log('copyToClipboard called with text length:', text.length);
+    console.log('Button element:', button);
+    
+    if (!navigator.clipboard) {
+        console.warn('Clipboard API not available, using fallback');
+        // Fallback for older browsers
+        copyToClipboardFallback(text, button);
+        return;
+    }
+    
+    navigator.clipboard.writeText(text).then(function() {
+        console.log('Text copied successfully');
+        // Store original icon
+        const icon = button.querySelector('i');
+        const originalClass = icon.className;
+        
+        // Change to success icon
+        icon.className = 'bi bi-check-circle-fill text-success';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-primary');
+        
+        // Show success feedback
+        const tooltip = new bootstrap.Tooltip(button, {
+            title: 'Copied!',
+            trigger: 'manual'
+        });
+        tooltip.show();
+        
+        // Reset after 2 seconds
+        setTimeout(function() {
+            icon.className = originalClass;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+            tooltip.dispose();
+        }, 2000);
+    }).catch(function(err) {
+        console.error('Failed to copy text: ', err);
+        
+        // Fallback: select and copy
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            // Show success feedback
+            const icon = button.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = 'bi bi-check-circle-fill text-success';
+            
+            setTimeout(function() {
+                icon.className = originalClass;
+            }, 2000);
+        } catch (fallbackErr) {
+            console.error('Fallback copy failed: ', fallbackErr);
+            alert('Unable to copy password. Please copy manually.');
+        }
+        
+        document.body.removeChild(textArea);
+    });
+}
+
+function copyToClipboardFallback(text, button) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        console.log('Fallback copy result:', successful);
+        if (successful) {
+            // Show success feedback
+            const icon = button.querySelector('i');
+            const originalClass = icon.className;
+            icon.className = 'bi bi-check-circle-fill text-success';
+            
+            setTimeout(function() {
+                icon.className = originalClass;
+            }, 2000);
+        }
+    } catch (err) {
+        console.error('Fallback copy failed:', err);
+        alert('Unable to copy password. Please copy manually.');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+// Delete confirmation
+function confirmDelete(passwordId, serviceName) {
+    console.log('confirmDelete called with passwordId:', passwordId, 'serviceName:', serviceName);
+    
+    const serviceElement = document.getElementById('serviceToDelete');
+    const deleteForm = document.getElementById('deleteForm');
+    
+    if (!serviceElement || !deleteForm) {
+        console.error('Modal elements not found');
+        return;
+    }
+    
+    serviceElement.textContent = serviceName;
+    deleteForm.action = '/delete_password/' + passwordId;
+    
+    console.log('Delete form action set to:', deleteForm.action);
+    
+    // Check if Bootstrap is available
+    if (typeof bootstrap === 'undefined') {
+        console.error('Bootstrap is not loaded');
+        if (confirm('Are you sure you want to delete the password for ' + serviceName + '?')) {
+            deleteForm.submit();
+        }
+        return;
+    }
+    
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+    console.log('Delete modal shown');
+}
+
+// Auto-hide passwords after 30 seconds for security
+let passwordVisibilityTimer;
+
+function startPasswordVisibilityTimer() {
+    clearTimeout(passwordVisibilityTimer);
+    passwordVisibilityTimer = setTimeout(function() {
+        hideAllPasswords();
+    }, 30000); // 30 seconds
+}
+
+// Set up event listeners for all buttons
+function setupEventListeners() {
+    console.log('Setting up event listeners...');
+    
+    // Password visibility toggle buttons
+    document.querySelectorAll('.toggle-password-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.dataset.target;
+            console.log('Toggle button clicked for:', targetId);
+            togglePasswordVisibility(targetId);
+            startPasswordVisibilityTimer();
+        });
+    });
+    
+    // Copy password buttons
+    document.querySelectorAll('.copy-password-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const password = this.dataset.password;
+            console.log('Copy button clicked for password length:', password.length);
+            copyToClipboard(password, this);
+        });
+    });
+    
+    // Delete password buttons
+    document.querySelectorAll('.delete-password-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const passwordId = this.dataset.passwordId;
+            const serviceName = this.dataset.serviceName;
+            console.log('Delete button clicked for:', serviceName);
+            confirmDelete(passwordId, serviceName);
+        });
+    });
+    
+    // Show all passwords button
+    document.querySelectorAll('.show-all-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Show all button clicked');
+            showAllPasswords();
+        });
+    });
+    
+    // Hide all passwords button
+    document.querySelectorAll('.hide-all-btn').forEach(function(button) {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('Hide all button clicked');
+            hideAllPasswords();
+        });
+    });
+    
+    console.log('Event listeners setup complete');
+}
+
+// Initialize everything when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Dashboard JavaScript loaded successfully');
+    
+    // Test if functions are defined
+    console.log('togglePasswordVisibility function exists:', typeof togglePasswordVisibility === 'function');
+    console.log('copyToClipboard function exists:', typeof copyToClipboard === 'function');
+    console.log('confirmDelete function exists:', typeof confirmDelete === 'function');
+    console.log('showAllPasswords function exists:', typeof showAllPasswords === 'function');
+    console.log('hideAllPasswords function exists:', typeof hideAllPasswords === 'function');
+    
+    // Test Bootstrap availability
+    console.log('Bootstrap available:', typeof bootstrap !== 'undefined');
+    
+    // Set up event listeners for buttons
+    setupEventListeners();
+    
+    // Set up search functionality
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        console.log('Setting up search functionality');
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const passwordItems = document.querySelectorAll('.password-item');
+            const noResults = document.getElementById('noResults');
+            let visibleCount = 0;
+            
+            console.log('Search triggered with term:', searchTerm);
+            console.log('Found password items:', passwordItems.length);
+
+            passwordItems.forEach(function(item) {
+                const service = item.dataset.service || '';
+                const username = item.dataset.username || '';
+                const url = item.dataset.url || '';
+                
+                const isMatch = service.includes(searchTerm) || 
+                               username.includes(searchTerm) || 
+                               url.includes(searchTerm);
+                
+                if (searchTerm === '' || isMatch) {
+                    item.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+
+            console.log('Visible items after search:', visibleCount);
+
+            // Show/hide no results message
+            if (noResults) {
+                if (visibleCount === 0 && searchTerm !== '') {
+                    noResults.style.display = 'block';
+                    console.log('Showing no results message');
+                } else {
+                    noResults.style.display = 'none';
+                }
+            }
+        });
+    } else {
+        console.error('Search input not found!');
+    }
+    
+    // Initialize tooltips
+    try {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
+        tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    } catch (err) {
+        console.warn('Could not initialize tooltips:', err);
+    }
+    
+    // Test button functionality - count found buttons
+    const passwordButtons = document.querySelectorAll('.toggle-password-btn');
+    console.log('Found password visibility buttons:', passwordButtons.length);
+    
+    const copyButtons = document.querySelectorAll('.copy-password-btn');
+    console.log('Found copy buttons:', copyButtons.length);
+    
+    const deleteButtons = document.querySelectorAll('.delete-password-btn');
+    console.log('Found delete buttons:', deleteButtons.length);
+    
+    const showAllButtons = document.querySelectorAll('.show-all-btn');
+    console.log('Found show all buttons:', showAllButtons.length);
+    
+    const hideAllButtons = document.querySelectorAll('.hide-all-btn');
+    console.log('Found hide all buttons:', hideAllButtons.length);
+    
+    console.log('Dashboard initialization complete!');
+});
+</script>
+{% endblock %}

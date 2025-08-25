@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Secure Password Manager{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="hero-title">
+                    <i class="bi bi-shield-lock-fill me-3"></i>
+                    SecurePass
+                </h1>
+                <p class="hero-subtitle">
+                    Your passwords, secured with military-grade encryption. 
+                    Never forget a password again while keeping them completely safe.
+                </p>
+                
+                {% if not current_user.is_authenticated %}
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-person-plus-fill me-2"></i>
+                        Get Started Free
+                    </a>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>
+                        Sign In
+                    </a>
+                </div>
+                {% else %}
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-grid-fill me-2"></i>
+                        Go to Dashboard
+                    </a>
+                    <a href="{{ url_for('add_password') }}" class="btn btn-success btn-lg">
+                        <i class="bi bi-plus-circle-fill me-2"></i>
+                        Add New Password
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <h2 class="text-white mb-4">Why Choose SecurePass?</h2>
+            <p class="text-white-50 lead">
+                Built with security-first principles and modern cryptography
+            </p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Security Feature -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h5 class="card-title">Military-Grade Encryption</h5>
+                    <p class="card-text">
+                        Your passwords are protected with AES-256 encryption, 
+                        the same standard used by governments and militaries worldwide.
+                    </p>
+                    <div class="mt-3">
+                        <span class="badge bg-primary">AES-256</span>
+                        <span class="badge bg-secondary">bcrypt</span>
+                        <span class="badge bg-success">PBKDF2</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Privacy Feature -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-incognito"></i>
+                    </div>
+                    <h5 class="card-title">Zero-Knowledge Architecture</h5>
+                    <p class="card-text">
+                        We never see your passwords. Everything is encrypted locally 
+                        with your master password before being stored.
+                    </p>
+                    <div class="mt-3">
+                        <span class="badge bg-info">Local Encryption</span>
+                        <span class="badge bg-warning">No Backdoors</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Usability Feature -->
+        <div class="col-md-4">
+            <div class="card h-100 text-center">
+                <div class="card-body p-4">
+                    <div class="feature-icon">
+                        <i class="bi bi-lightning-charge"></i>
+                    </div>
+                    <h5 class="card-title">Simple & Fast</h5>
+                    <p class="card-text">
+                        Intuitive interface makes managing passwords effortless. 
+                        Add, edit, and access your passwords in seconds.
+                    </p>
+                    <div class="mt-3">
+                        <span class="badge bg-success">User Friendly</span>
+                        <span class="badge bg-primary">Fast Access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Security Information -->
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header text-center">
+                    <h4 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Security Information
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-check-circle-fill text-success me-2"></i>Security Features</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-dot"></i> AES-256-GCM encryption</li>
+                                <li><i class="bi bi-dot"></i> bcrypt password hashing</li>
+                                <li><i class="bi bi-dot"></i> CSRF protection</li>
+                                <li><i class="bi bi-dot"></i> Secure session management</li>
+                                <li><i class="bi bi-dot"></i> Input validation & sanitization</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-shield-lock-fill text-primary me-2"></i>Privacy Guarantees</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-dot"></i> Local-only encryption</li>
+                                <li><i class="bi bi-dot"></i> No password recovery backdoors</li>
+                                <li><i class="bi bi-dot"></i> Minimal data collection</li>
+                                <li><i class="bi bi-dot"></i> Open-source implementation</li>
+                                <li><i class="bi bi-dot"></i> Educational purpose only</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    {% if not current_user.is_authenticated %}
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-3">Ready to secure your passwords?</p>
+                        <a href="{{ url_for('register') }}" class="btn btn-primary">
+                            <i class="bi bi-person-plus-fill me-2"></i>
+                            Create Your Account
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Section (if user is logged in) -->
+{% if current_user.is_authenticated %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="bi bi-person-circle me-2"></i>
+                        Welcome back, {{ current_user.username }}!
+                    </h5>
+                    <p class="card-text">
+                        Your passwords are secure and ready to access.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3 mt-3">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                            <i class="bi bi-grid-fill me-2"></i>
+                            View Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
