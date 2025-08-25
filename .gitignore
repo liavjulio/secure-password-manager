@@ -67,9 +67,15 @@ htmlcov/
 # Environment variables (keep .env.example)
 .env
 
-# PDFs (optional - you might want to include them)
-# *.pdf
+# PDFs and large binary files
+*.pdf
+*.log
+*.zip
+*.tar.gz
 
 # Documentation build
 docs/_build/
-*.md
+
+# Keep important markdown files but exclude generated ones
+*.md.backup
+*_backup.md
